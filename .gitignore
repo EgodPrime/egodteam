@@ -1,0 +1,25 @@
+# Go build artifacts
+bin/
+*.a
+*.so
+*.o
+*.exe
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Log files
+tmp/
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Test coverage reports
+coverage.out
+.coverage

@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>models: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">egodteam/internal/data/models/dev_task.go (100.0%)</option>
+				
+				<option value="file1">egodteam/internal/data/models/sprint.go (100.0%)</option>
+				
+				<option value="file2">egodteam/internal/data/models/user_story.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// DevTask represents a development task in the agile process
+package models
+
+import (
+        "math/rand"
+        "strconv"
+        "time"
+)
+
+// TaskType represents the type of development task
+type TaskType string
+
+const (
+        TaskDevelopment TaskType = "Development"
+        TaskTesting     TaskType = "Testing"
+        TaskDeployment  TaskType = "Deployment"
+)
+
+// TaskStatus represents the status of a development task
+type TaskStatus string
+
+const (
+        TaskTodo       TaskStatus = "Todo"
+        TaskInProgress TaskStatus = "InProgress"
+        TaskDone       TaskStatus = "Done"
+        TaskBlocked    TaskStatus = "Blocked"
+)
+
+// DevTask represents a development task in the agile process
+type DevTask struct {
+        ID           string        `json:"id"`
+        StoryID      string        `json:"story_id"`
+        Title        string        `json:"title"`
+        Type         TaskType      `json:"type"`
+        Estimate     time.Duration `json:"estimate"` // Estimated duration in hours
+        Status       TaskStatus    `json:"status"`
+        Assignee     string        `json:"assignee"`     // Developer ID
+        Dependencies []string      `json:"dependencies"` // IDs of dependent tasks
+}
+
+// NewDevTask creates a new development task
+func NewDevTask(storyID, title, assignee string) *DevTask <span class="cov8" title="1">{
+        return &amp;DevTask{
+                ID:           generateIDDT(),
+                StoryID:      storyID,
+                Title:        title,
+                Type:         TaskDevelopment,
+                Estimate:     time.Hour * 4, // Default to 4 hours
+                Status:       TaskTodo,
+                Assignee:     assignee,
+                Dependencies: []string{},
+        }
+}</span>
+
+// Update updates the task with new values
+func (dt *DevTask) Update(title string, taskType TaskType, estimate time.Duration, assignee string) <span class="cov8" title="1">{
+        dt.Title = title
+        dt.Type = taskType
+        dt.Estimate = estimate
+        dt.Assignee = assignee
+}</span>
+
+// SetStatus updates the status of the task
+func (dt *DevTask) SetStatus(status TaskStatus) <span class="cov8" title="1">{
+        dt.Status = status
+}</span>
+
+// AddDependency adds a new dependency, preventing duplicates
+func (dt *DevTask) AddDependency(dependencyID string) <span class="cov8" title="1">{
+        for _, dep := range dt.Dependencies </span><span class="cov8" title="1">{
+                if dep == dependencyID </span><span class="cov8" title="1">{
+                        return // Don't add if already exists
+                }</span>
+        }
+        <span class="cov8" title="1">dt.Dependencies = append(dt.Dependencies, dependencyID)</span>
+}
+
+// RemoveDependency removes a dependency
+func (dt *DevTask) RemoveDependency(dependencyID string) <span class="cov8" title="1">{
+        for i, dep := range dt.Dependencies </span><span class="cov8" title="1">{
+                if dep == dependencyID </span><span class="cov8" title="1">{
+                        dt.Dependencies = append(dt.Dependencies[:i], dt.Dependencies[i+1:]...)
+                        break</span>
+                }
+        }
+}
+
+// generateIDDT generates a unique ID for a development task
+func generateIDDT() string <span class="cov8" title="1">{
+        return "task-" + time.Now().Format("20060102150405.000000") + "." + strconv.FormatInt(rand.Int63(), 10)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Sprint represents an iteration in the agile development process
+package models
+
+import (
+        "math/rand"
+        "strconv"
+        "time"
+)
+
+// BurnDownPoint represents a data point in the burn-down chart
+type BurnDownPoint struct {
+        Date time.Time `json:"date"`
+        Left int       `json:"left"` // Remaining story points
+}
+
+// Sprint represents an iteration in the agile development process
+type Sprint struct {
+        ID        string          `json:"id"`
+        Goal      string          `json:"goal"`
+        StartDate time.Time       `json:"start_date"`
+        EndDate   time.Time       `json:"end_date"`
+        Velocity  int             `json:"velocity"`  // Team velocity
+        Committed []string        `json:"committed"` // IDs of committed user stories
+        Completed []string        `json:"completed"` // IDs of completed user stories
+        BurnDown  []BurnDownPoint `json:"burn_down"` // Burn-down chart data
+}
+
+// generateIDS generates a unique ID for a sprint
+func generateIDS() string <span class="cov8" title="1">{
+        return "sprint-" + time.Now().Format("20060102150405.000000") + "." + strconv.FormatInt(rand.Int63(), 10)
+}</span>
+
+// NewSprint creates a new sprint with default values
+func NewSprint(goal string, startDate, endDate time.Time) *Sprint <span class="cov8" title="1">{
+        return &amp;Sprint{
+                ID:        generateIDS(),
+                Goal:      goal,
+                StartDate: startDate,
+                EndDate:   endDate,
+                Velocity:  0,
+                Committed: []string{},
+                Completed: []string{},
+                BurnDown:  []BurnDownPoint{},
+        }
+}</span>
+
+// AddCommittedStory adds a user story to the committed list
+func (s *Sprint) AddCommittedStory(storyID string) <span class="cov8" title="1">{
+        if !contains(s.Committed, storyID) </span><span class="cov8" title="1">{
+                s.Committed = append(s.Committed, storyID)
+        }</span>
+}
+
+// RemoveCommittedStory removes a user story from the committed list
+func (s *Sprint) RemoveCommittedStory(storyID string) <span class="cov8" title="1">{
+        for i, id := range s.Committed </span><span class="cov8" title="1">{
+                if id == storyID </span><span class="cov8" title="1">{
+                        s.Committed = append(s.Committed[:i], s.Committed[i+1:]...)
+                        break</span>
+                }
+        }
+}
+
+// AddCompletedStory adds a user story to the completed list
+func (s *Sprint) AddCompletedStory(storyID string) <span class="cov8" title="1">{
+        if !contains(s.Completed, storyID) </span><span class="cov8" title="1">{
+                s.Completed = append(s.Completed, storyID)
+        }</span>
+}
+
+// SetVelocity sets the team velocity
+func (s *Sprint) SetVelocity(velocity int) <span class="cov8" title="1">{
+        s.Velocity = velocity
+}</span>
+
+// AddBurnDownPoint adds a data point to the burn-down chart
+func (s *Sprint) AddBurnDownPoint(date time.Time, left int) <span class="cov8" title="1">{
+        point := BurnDownPoint{
+                Date: date,
+                Left: left,
+        }
+        s.BurnDown = append(s.BurnDown, point)
+}</span>
+
+// contains checks if a slice contains an element
+func contains(slice []string, item string) bool <span class="cov8" title="1">{
+        for _, s := range slice </span><span class="cov8" title="1">{
+                if s == item </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// UserStory represents a user story in the agile development process
+package models
+
+import (
+        "math/rand"
+        "strconv"
+        "time"
+)
+
+// PriorityLevel represents the priority of a user story
+type PriorityLevel string
+
+const (
+        PriorityHigh   PriorityLevel = "High"
+        PriorityMedium PriorityLevel = "Medium"
+        PriorityLow    PriorityLevel = "Low"
+)
+
+// StoryStatus represents the status of a user story
+type StoryStatus string
+
+const (
+        StoryDraft      StoryStatus = "Draft"
+        StoryReady      StoryStatus = "Ready"
+        StoryInProgress StoryStatus = "InProgress"
+        StoryDone       StoryStatus = "Done"
+)
+
+// UserStory represents a user story in the agile development process
+type UserStory struct {
+        ID                 string         `json:"id"`
+        Title              string         `json:"title"`
+        Description        string         `json:"description"`
+        AcceptanceCriteria []string       `json:"acceptance_criteria"`
+        BusinessValue      int            `json:"business_value"` // 1-10
+        Priority           PriorityLevel  `json:"priority"`
+        Status             StoryStatus    `json:"status"`
+        Estimate           *StoryEstimate `json:"estimate"`
+        CreatedAt          time.Time      `json:"created_at"`
+        UpdatedAt          time.Time      `json:"updated_at"`
+}
+
+// StoryEstimate represents the estimation of a user story
+type StoryEstimate struct {
+        Points int `json:"points"` // Story points estimate
+}
+
+// NewUserStory creates a new UserStory with default values
+func NewUserStory(title, description string) *UserStory <span class="cov8" title="1">{
+        return &amp;UserStory{
+                ID:                 generateIDUS(),
+                Title:              title,
+                Description:        description,
+                AcceptanceCriteria: []string{},
+                BusinessValue:      5,
+                Priority:           PriorityMedium,
+                Status:             StoryDraft,
+                Estimate:           &amp;StoryEstimate{Points: 0},
+                CreatedAt:          time.Now(),
+                UpdatedAt:          time.Now(),
+        }
+}</span>
+
+func generateIDUS() string <span class="cov8" title="1">{
+        return "story-" + time.Now().Format("20060102150405.000000") + "." + strconv.FormatInt(rand.Int63(), 10)
+}</span>
+
+// Update updates the user story with new values
+func (us *UserStory) Update(title, description string, priority PriorityLevel, businessValue int) <span class="cov8" title="1">{
+        us.Title = title
+        us.Description = description
+        us.Priority = priority
+        us.BusinessValue = businessValue
+        us.UpdatedAt = time.Now()
+}</span>
+
+// SetStatus updates the status of the user story
+func (us *UserStory) SetStatus(status StoryStatus) <span class="cov8" title="1">{
+        us.Status = status
+        us.UpdatedAt = time.Now()
+}</span>
+
+// AddAcceptanceCriterion adds a new acceptance criterion
+func (us *UserStory) AddAcceptanceCriterion(criterion string) <span class="cov8" title="1">{
+        us.AcceptanceCriteria = append(us.AcceptanceCriteria, criterion)
+        us.UpdatedAt = time.Now()
+}</span>
+
+// SetEstimate sets the story point estimate
+func (us *UserStory) SetEstimate(points int) <span class="cov8" title="1">{
+        us.Estimate.Points = points
+        us.UpdatedAt = time.Now()
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
